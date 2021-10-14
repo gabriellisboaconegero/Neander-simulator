@@ -1,0 +1,17 @@
+{
+  "files": {
+    "main.js": "/Neander-simulator/static/js/main.c0d96129.chunk.js",
+    "main.js.map": "/Neander-simulator/static/js/main.c0d96129.chunk.js.map",
+    "runtime-main.js": "/Neander-simulator/static/js/runtime-main.638163cc.js",
+    "runtime-main.js.map": "/Neander-simulator/static/js/runtime-main.638163cc.js.map",
+    "static/js/2.b8f28206.chunk.js": "/Neander-simulator/static/js/2.b8f28206.chunk.js",
+    "static/js/2.b8f28206.chunk.js.map": "/Neander-simulator/static/js/2.b8f28206.chunk.js.map",
+    "index.html": "/Neander-simulator/index.html",
+    "static/js/2.b8f28206.chunk.js.LICENSE.txt": "/Neander-simulator/static/js/2.b8f28206.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.638163cc.js",
+    "static/js/2.b8f28206.chunk.js",
+    "static/js/main.c0d96129.chunk.js"
+  ]
+}
