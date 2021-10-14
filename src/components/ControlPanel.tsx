@@ -11,7 +11,8 @@ export const ControlPanel: React.FC = () => {
     step,
     zerarAc,
     op_load,
-    setMem
+    zerarPc,
+    run
   } = useNeander();
   const [addr, setAddr] = useState(0);
 
@@ -21,7 +22,6 @@ export const ControlPanel: React.FC = () => {
 
   return(
     <div>
-      <button onClick={e => setMem(3, 32)}>Set mem</button>
       <div className="ac_panel">
         <div>
           <p>AC: {ac}</p>
@@ -37,7 +37,7 @@ export const ControlPanel: React.FC = () => {
           value={addr}
           onChange={e => setAddr(parseInt(e.target.value))}
         />
-        <button onClick={e => op_load(addr)} >Aumentar AC</button>
+        <button onClick={e => op_load(addr)} >Set AC</button>
       </div>
       <div className="pc_panel">
         <p>PC: {Digit3Number(pc)}</p>
@@ -48,7 +48,8 @@ export const ControlPanel: React.FC = () => {
       </div>
       <div className="controls">
         <button onClick={e => step()} >Step</button>
-        <button>Run</button>
+        <button onClick={e => zerarPc()} >Zerar Pc</button>
+        <button onClick={e => run()}>Run</button>
       </div>
     </div>
   );

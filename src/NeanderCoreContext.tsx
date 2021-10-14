@@ -1,4 +1,4 @@
-import React, { createContext, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 
 export enum OpType {
   BINARY,
@@ -77,7 +77,9 @@ type NeanderContextType = {
   op_load: (addr: number) => void;
   zerarAc: () => void;
   changeMemoryType: (addr: number, new_type: OpType) => void;
-  setMem: (addr: number, value: number) => void;
+  updateMem: (addr: number, value: number) => void;
+  zerarPc: () => void;
+  run: () => void
 }
 
 export const NeanderContext = createContext<NeanderContextType>({} as NeanderContextType);
@@ -99,6 +101,24 @@ export const NeanderCoreContext: React.FC = ({children}) => {
   const [flagN, setFlagN] = useState(colocarSinal(ac) < 0);
   const [flagZ, setFlagZ] = useState(ac === 0);
 
+  const [halt, setHalt] = useState(true);
+  const [maxDepth, setMaxDepth] = useState(300);
+  const [depth, setDepth] = useState(0);
+
+  useEffect(() => {
+    setFlagN(colocarSinal(ac) < 0);
+    setFlagZ(ac === 0);
+  }, [ac]);
+
+  useEffect(() => {
+    if(!halt && pc < memory.length && depth <= maxDepth){
+      step();
+      console.log("Dando um passo", depth);
+    }else if(pc >= memory.length ||  depth > maxDepth){
+      setHalt(true);
+    }
+  }, [halt, pc]);
+
   function colocarSinal(number: number): number{
     return number >= 128? -(255 - number): number
   }
@@ -107,22 +127,118 @@ export const NeanderCoreContext: React.FC = ({children}) => {
     memory[addr].type = new_type;
   }
 
+  function run(){
+    setHalt(false);
+  }
+
   function step(){
+    let localPc = pc;
+    let op = memory[localPc];
+    let op_name = MNEMONICOS[(memory[localPc].value >> 4) << 4] || MNEMONICOS[0];
+    let next_op = memory[localPc + 1];
+    if (op.type ==  OpType.BINARY){
+      localPc += 2
+    }else{
+      localPc += 1;
+    }
+    setDepth(prev => prev + 1);
+
+    switch (op_name.op) {
+      case "NOP":
+        console.log("Não fez nada")
+        break;
+      case "STA":
+        op_sta(next_op.value);
+        break;
+      case "LDA":
+        op_load(next_op.value);
+        break;
+      case "ADD":
+        op_add(next_op.value);
+        break;
+      case "OR":
+        op_or(next_op.value);
+        break;
+      case "AND":
+        op_and(next_op.value);
+        break;
+      case "NOT":
+        op_not();
+        break;
+      case "JMP":
+        localPc = next_op.value
+        break;
+      case "JN":
+        if (flagN) localPc = next_op.value
+        break;
+      case "JZ":
+        if (flagZ) localPc = next_op.value
+        break;
+      case "HLT":
+        op_hlt();
+        break;
+    
+      default:
+        break;
+    }
     if (pc < memory.length){
-      setPc(prev => prev + 1);
+      setPc(localPc);
     }
   }
 
   function op_load(addr: number){
-    addr %= 255;
     setAc(memory[addr].value);
+  }
+
+  function op_sta(addr: number){
+    updateMem(addr, ac);
+  }
+
+  function op_add(addr: number){
+    setAc(prev => prev + memory[addr].value);
+  }
+
+  function op_or(value: number){
+    setAc(prev => prev | value);
+  }
+
+  function op_and(value: number){
+    setAc(prev => prev & value);
+  }
+
+  function op_not(){
+    setAc(prev => ~prev);
+  }
+
+  // function op_jmp(addr: number){   just to know that they are operations
+  //   setPc(addr);
+  // }
+
+  // function op_jn(addr: number){
+  //   if (flagN){
+  //     setPc(addr);
+  //   }
+  // }
+
+  // function op_jz(addr: number){
+  //   if (flagZ){
+  //     setPc(addr);
+  //   }
+  // }
+
+  function op_hlt(){
+    setHalt(true);
   }
 
   function zerarAc(){
     setAc(0);
   }
 
-  function setMem(addr: number, value: number){
+  function zerarPc(){
+    setPc(0);
+  }
+
+  function updateMem(addr: number, value: number){
     if (addr <  0 || addr > 255){
       return
     }
@@ -140,7 +256,7 @@ export const NeanderCoreContext: React.FC = ({children}) => {
             prev[pos].type = op.op_type
           }
         }
-        if (prev[pos].type == OpType.BINARY || pos === addr){
+        if (prev[pos].type === OpType.BINARY || pos === addr){
           continue;
         }
         break
@@ -160,7 +276,9 @@ export const NeanderCoreContext: React.FC = ({children}) => {
     step,
     zerarAc,
     changeMemoryType,
-    setMem
+    updateMem,
+    zerarPc,
+    run
   }
   return(
     <NeanderContext.Provider value={contextValues} >
