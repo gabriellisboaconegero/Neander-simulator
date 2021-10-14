@@ -8,11 +8,8 @@
 # testing
 /coverage
 
-#build
-/public
-/src
-.env
-yarn.lock
+# production
+/build
 
 # misc
 .DS_Store
