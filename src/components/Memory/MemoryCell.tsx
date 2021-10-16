@@ -1,7 +1,7 @@
 import React, { AllHTMLAttributes } from 'react';
 import { MemoryCellType, OpType } from '../../NeanderCoreContext';
-import useMnemonico from '../../useMnemonico';
-import { useNeander } from '../../useNeader';
+import useMnemonico from '../../hooks/useMnemonico';
+import { useNeander } from '../../hooks/useNeader';
 import { MemoryCellWrapper } from './styles';
 
 type Props = AllHTMLAttributes<HTMLElement> & {

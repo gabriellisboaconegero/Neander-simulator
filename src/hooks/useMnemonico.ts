@@ -1,4 +1,4 @@
-import { MNEMONICOS } from "./NeanderCoreContext";
+import { MNEMONICOS } from "../NeanderCoreContext";
 import { useNeander } from "./useNeader";
 
 const useMnemonico = () => {

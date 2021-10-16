@@ -1,4 +1,5 @@
 import React, { createContext, useEffect, useState } from "react";
+import { PageWrapper } from "./styles";
 
 export enum OpType {
   BINARY,
@@ -75,11 +76,12 @@ type NeanderContextType = {
   colocarSinal: (number: number) => number;
   step: () => void;
   op_load: (addr: number) => void;
-  zerarAc: () => void;
+  setNewAc: (value: number) => void;
   changeMemoryType: (addr: number, new_type: OpType) => void;
   updateMem: (addr: number, value: number) => void;
   zerarPc: () => void;
   run: () => void
+  bitComplement: (value: number, size: number) => number;
 }
 
 export const NeanderContext = createContext<NeanderContextType>({} as NeanderContextType);
@@ -120,11 +122,21 @@ export const NeanderCoreContext: React.FC = ({children}) => {
   }, [halt, pc]);
 
   function colocarSinal(number: number): number{
-    return number >= 128? -(255 - number): number
+    return number >= 128? -(memory.length - number): number
   }
 
   function changeMemoryType(addr: number, new_type: OpType){
     memory[addr].type = new_type;
+  }
+
+  function upDateAc(stateChangerOrPrev: React.SetStateAction<number>){
+    if (typeof stateChangerOrPrev === "number"){
+      stateChangerOrPrev = bitComplement(stateChangerOrPrev);
+      setAc(stateChangerOrPrev);
+    }else{     
+      let stateChanger = stateChangerOrPrev;
+      setAc(prevState => bitComplement(stateChanger(bitComplement(prevState))));
+    }
   }
 
   function run(){
@@ -136,7 +148,7 @@ export const NeanderCoreContext: React.FC = ({children}) => {
     let op = memory[localPc];
     let op_name = MNEMONICOS[(memory[localPc].value >> 4) << 4] || MNEMONICOS[0];
     let next_op = memory[localPc + 1];
-    if (op.type ==  OpType.BINARY){
+    if (op.type === OpType.BINARY){
       localPc += 2
     }else{
       localPc += 1;
@@ -187,7 +199,7 @@ export const NeanderCoreContext: React.FC = ({children}) => {
   }
 
   function op_load(addr: number){
-    setAc(memory[addr].value);
+    upDateAc(memory[addr].value);
   }
 
   function op_sta(addr: number){
@@ -195,19 +207,19 @@ export const NeanderCoreContext: React.FC = ({children}) => {
   }
 
   function op_add(addr: number){
-    setAc(prev => prev + memory[addr].value);
+    upDateAc(prev => prev + memory[addr].value);
   }
 
   function op_or(value: number){
-    setAc(prev => prev | value);
+    upDateAc(prev => prev | value);
   }
 
   function op_and(value: number){
-    setAc(prev => prev & value);
+    upDateAc(prev => prev & value);
   }
 
   function op_not(){
-    setAc(prev => ~prev);
+    upDateAc(prev => ~prev);
   }
 
   // function op_jmp(addr: number){   just to know that they are operations
@@ -230,20 +242,27 @@ export const NeanderCoreContext: React.FC = ({children}) => {
     setHalt(true);
   }
 
-  function zerarAc(){
-    setAc(0);
+  function setNewAc(value: number){
+    upDateAc(value);
   }
 
   function zerarPc(){
     setPc(0);
   }
 
-  function updateMem(addr: number, value: number){
-    if (addr <  0 || addr > 255){
-      return
+  function bitComplement(value: number, size: number=8){
+    size = 2**size;
+    if (value < 0){
+      value = size + value;
     }
+    return value & (size - 1);
+  }
+
+  function updateMem(addr: number, newValue: number){
+    newValue = bitComplement(newValue);
+    addr = bitComplement(addr);
     setMemory(prev => {
-      prev[addr].value = value;
+      prev[addr].value = newValue;
       for (let pos=addr; pos < prev.length; pos++){
         const op = MNEMONICOS[(prev[pos].value >> 4) << 4] || MNEMONICOS[0];
         if (pos === 0){
@@ -274,15 +293,18 @@ export const NeanderCoreContext: React.FC = ({children}) => {
     colocarSinal,
     op_load,
     step,
-    zerarAc,
+    setNewAc,
     changeMemoryType,
     updateMem,
     zerarPc,
-    run
+    run,
+    bitComplement
   }
   return(
     <NeanderContext.Provider value={contextValues} >
-      {children}
+      <PageWrapper>
+        {children}
+      </PageWrapper>
     </NeanderContext.Provider >
   );
 }

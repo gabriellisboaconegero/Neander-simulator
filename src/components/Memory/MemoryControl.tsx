@@ -1,5 +1,8 @@
-import React, { KeyboardEvent, useEffect, useRef, useState } from 'react';
-import { useNeander } from '../../useNeader';
+import React, { ChangeEvent, FormEvent, KeyboardEvent, useEffect, useRef, useState } from 'react';
+import useBitComplement from '../../hooks/useBitComplement';
+import { useNeander } from '../../hooks/useNeader';
+import useValidAddr from '../../hooks/useValidAddr';
+import { MemoryWrapper } from '../styles';
 import { Memory } from './Memory';
 
 
@@ -9,12 +12,14 @@ export const MemoryControl: React.FC = () => {
     updateMem,
   }  = useNeander();
 
-  const [value, setValue] = useState(0);
+  const [instructionAddr, setInstructionAddr] = useState("");
   const [selecting, setSelecting] = useState(false);
   const [selected, setSelected] = useState(0);
+  const isValidAddr = useValidAddr();
+  const bitComplement = useBitComplement();
 
   useEffect(() => {
-    setValue(memory[selected].value);
+    inputRef.current?.focus();
     inputRef.current?.select();
   }, [selected]);
 
@@ -22,16 +27,12 @@ export const MemoryControl: React.FC = () => {
     
     switch (ev.key) {
       case "ArrowDown":
-        setSelected(prev => {
-          return prev > memory.length? prev: prev + 1
-        });
+        handleClickOnMemoryCell(bitComplement(selected + 1));
         ev.preventDefault();
         break;
 
       case "ArrowUp":
-        setSelected(prev => {
-          return prev <= 0? prev: prev - 1
-        });
+        handleClickOnMemoryCell(bitComplement(selected - 1));
         ev.preventDefault();
         break;
     
@@ -42,21 +43,30 @@ export const MemoryControl: React.FC = () => {
 
   function handleClickOnMemoryCell(addr: number){
     setSelected(addr);
+    setInstructionAddr(String(memory[addr].value));
     inputRef.current?.focus();
+    inputRef.current?.select();
     if (selecting) return;
     setSelecting(true);
-    
+  }
+
+  function handleNewInstructionInput(e: ChangeEvent<HTMLInputElement>){
+    if (isValidAddr(e)){
+      setInstructionAddr(e.target.value);
+    }
+  }
+
+  function  handlePushNewInstructionToMem(e: FormEvent<HTMLFormElement>){
+    e.preventDefault();
+    handleClickOnMemoryCell(selected + 1);
+    updateMem(selected, parseInt(instructionAddr) || 0)
   }
   const inputRef = useRef<HTMLInputElement>(null);
   
   return(
-    <div>
+    <MemoryWrapper>
       <form
-        onSubmit={e => {
-          e.preventDefault();
-          handleClickOnMemoryCell(selected + 1);
-          updateMem(selected, value)
-        }}
+        onSubmit={handlePushNewInstructionToMem}
       >
         <Memory
           selected={selected}
@@ -65,29 +75,33 @@ export const MemoryControl: React.FC = () => {
           showP
           onClick={handleClickOnMemoryCell}
         />
-        <label htmlFor="teste2">Addr: {selected}</label>
         <input
           onBlur={e => {
             setSelecting(false)
           }}
           onKeyDown={handleKeyDown}
           ref={inputRef}
-          type="number"
           name="teste2"
           id="teste2"
-          min="0"
-          max="255"
-          value={value}
-          onChange={e => setValue(parseInt(e.target.value))}
+          value={instructionAddr}
+          onChange={handleNewInstructionInput}
+          type="text"
+          placeholder="Instruction nº[-128, 255]"
+          autoComplete="off"
+          onFocus={e => e.target.select()}
+          onLoad={e => console.log(e)}
+          onClick={e => handleClickOnMemoryCell(selected)}
         />
         <button type="submit">Set mem</button>
       </form>
-      <Memory 
-        selected={selected}
-        selecting={selecting}
-        onClick={handleClickOnMemoryCell}
-      />
-    </div>
+      <div className="just_see">
+        <Memory
+          selected={selected}
+          selecting={selecting}
+          onClick={handleClickOnMemoryCell}
+        />
+      </div>
+    </MemoryWrapper>
 
   );
 }

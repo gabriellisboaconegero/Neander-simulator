@@ -1,5 +1,6 @@
 import React from 'react';
-import { useNeander } from '../../useNeader';
+import { useNeander } from '../../hooks/useNeader';
+import { MemoryStyled } from '../styles';
 import { MemoryCell } from './MemoryCell';
 
 type Props = {
@@ -16,9 +17,7 @@ export const Memory: React.FC<Props> = ({showOP, showP, selecting, selected, onC
   }  = useNeander();
 
   return (
-    <table 
-      style={{display: "inline-block", height:"350px", overflow:"auto"}}
-    >
+    <MemoryStyled>
       <thead>
         <tr>
           {showP && <th>P</th>}
@@ -43,6 +42,6 @@ export const Memory: React.FC<Props> = ({showOP, showP, selecting, selected, onC
           )
         })}
       </tbody>
-    </table>
+    </MemoryStyled>
   );
 }

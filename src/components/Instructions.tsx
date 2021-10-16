@@ -1,14 +1,15 @@
 import React from 'react';
 import { MNEMONICOS } from '../NeanderCoreContext';
+import { InstructionsWrapper } from './styles';
 
 export const Instructions: React.FC = () => {
   return(
-    <div>
+    <InstructionsWrapper>
       {Object.entries(MNEMONICOS).map(([op_code, op], id) => {
         return(
-          <p key={`instruction_map_item_${id}`}><strong>{op.op}</strong>: {op_code}</p>
+          <li key={`instruction_map_item_${id}`}><strong>{op.op}</strong>: {op_code}</li>
         )
       })}
-    </div>
+    </InstructionsWrapper>
   );
 }
