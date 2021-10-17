@@ -1,17 +1,17 @@
 {
   "files": {
-    "main.js": "/Neander-simulator/static/js/main.c5e63105.chunk.js",
-    "main.js.map": "/Neander-simulator/static/js/main.c5e63105.chunk.js.map",
+    "main.js": "/Neander-simulator/static/js/main.928336bd.chunk.js",
+    "main.js.map": "/Neander-simulator/static/js/main.928336bd.chunk.js.map",
     "runtime-main.js": "/Neander-simulator/static/js/runtime-main.638163cc.js",
     "runtime-main.js.map": "/Neander-simulator/static/js/runtime-main.638163cc.js.map",
-    "static/js/2.03332af9.chunk.js": "/Neander-simulator/static/js/2.03332af9.chunk.js",
-    "static/js/2.03332af9.chunk.js.map": "/Neander-simulator/static/js/2.03332af9.chunk.js.map",
+    "static/js/2.ecdfc03c.chunk.js": "/Neander-simulator/static/js/2.ecdfc03c.chunk.js",
+    "static/js/2.ecdfc03c.chunk.js.map": "/Neander-simulator/static/js/2.ecdfc03c.chunk.js.map",
     "index.html": "/Neander-simulator/index.html",
-    "static/js/2.03332af9.chunk.js.LICENSE.txt": "/Neander-simulator/static/js/2.03332af9.chunk.js.LICENSE.txt"
+    "static/js/2.ecdfc03c.chunk.js.LICENSE.txt": "/Neander-simulator/static/js/2.ecdfc03c.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.638163cc.js",
-    "static/js/2.03332af9.chunk.js",
-    "static/js/main.c5e63105.chunk.js"
+    "static/js/2.ecdfc03c.chunk.js",
+    "static/js/main.928336bd.chunk.js"
   ]
 }
