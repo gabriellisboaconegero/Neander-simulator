@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useState } from "react";
+import React, { createContext, memo, useEffect, useState } from "react";
 import { PageWrapper } from "./styles";
 
 export enum OpType {
@@ -80,8 +80,10 @@ type NeanderContextType = {
   changeMemoryType: (addr: number, new_type: OpType) => void;
   updateMem: (addr: number, value: number) => void;
   zerarPc: () => void;
-  run: () => void
+  run: () => void;
   bitComplement: (value: number, size: number) => number;
+  downloadMem: () => void;
+  shiftMem: (addrToShift: number, shiftDirection: number) => void;
 }
 
 export const NeanderContext = createContext<NeanderContextType>({} as NeanderContextType);
@@ -258,30 +260,78 @@ export const NeanderCoreContext: React.FC = ({children}) => {
     return value & (size - 1);
   }
 
+  function shiftMem(addrToShift: number, shiftDirection: number){
+    if (addrToShift === memory.length - 1 || memory[addrToShift].type === OpType.BINARY){
+      return;
+    }
+    setMemory(prev => {
+      const tempMem = prev.map(e => e);
+
+      tempMem[addrToShift + 1] = {
+        value: 0,
+        type: OpType.UNARY
+      }
+      for (let pos = addrToShift + 2;  pos < memory.length;  pos++){
+        tempMem[pos] = prev[pos - 1];
+      }
+      return setMem(0, tempMem[0].value, tempMem);
+    });
+  }
+
+  function setMem(addr: number, newValue: number, prev: MemoryCellType[]){
+    prev[addr].value = newValue;
+    for (let pos = addr; pos < prev.length; pos++){
+      const op = MNEMONICOS[(prev[pos].value >> 4) << 4] || MNEMONICOS[0];
+      if (pos === 0){
+        prev[pos].type = op.op_type
+      }else{
+        const prev_mem = prev[pos - 1];
+        if(prev_mem.type === OpType.BINARY){
+          prev[pos].type = OpType.ADDR
+        }else{
+          prev[pos].type = op.op_type
+        }
+      }
+      if (prev[pos].type === OpType.BINARY || pos === addr){
+        continue;
+      }
+      break
+    }
+    return prev
+  }
+
   function updateMem(addr: number, newValue: number){
     newValue = bitComplement(newValue);
     addr = bitComplement(addr);
-    setMemory(prev => {
-      prev[addr].value = newValue;
-      for (let pos=addr; pos < prev.length; pos++){
-        const op = MNEMONICOS[(prev[pos].value >> 4) << 4] || MNEMONICOS[0];
-        if (pos === 0){
-          prev[pos].type = op.op_type
-        }else{
-          const prev_mem = prev[pos - 1];
-          if(prev_mem.type === OpType.BINARY){
-            prev[pos].type = OpType.ADDR
-          }else{
-            prev[pos].type = op.op_type
-          }
+    setMemory(prev => setMem(addr, newValue, prev));
+  }
+
+  function downloadMem(){
+    let memText = "";
+    memory.forEach(({value, type}, id) => {
+      const op = MNEMONICOS[(value >> 4) << 4] || MNEMONICOS[0];
+      let opeartionStr = op.op;
+      if (id < memory.length - 1){
+        if (type === OpType.ADDR){
+          opeartionStr = "";
+        }else if (type === OpType.BINARY){
+          opeartionStr += ` ${memory[id + 1].value}`;
         }
-        if (prev[pos].type === OpType.BINARY || pos === addr){
-          continue;
-        }
-        break
       }
-      return [...prev]
+      memText += `${id}:${value} ${opeartionStr}\n`;
     });
+
+    const blob = new Blob([memText], {type: 'text'});
+    const fileDowloadUrl = URL.createObjectURL(blob);
+    const downloadElment = document.createElement("a");
+    downloadElment.href = fileDowloadUrl;
+    downloadElment.download = "neander_mem.txt";
+    document.body.appendChild(downloadElment);
+    downloadElment.click();
+    setTimeout(() => {
+      URL.revokeObjectURL(fileDowloadUrl);
+      document.body.removeChild(downloadElment);
+    }, 0);
   }
 
   const contextValues: NeanderContextType = {
@@ -298,7 +348,9 @@ export const NeanderCoreContext: React.FC = ({children}) => {
     updateMem,
     zerarPc,
     run,
-    bitComplement
+    bitComplement,
+    downloadMem,
+    shiftMem
   }
   return(
     <NeanderContext.Provider value={contextValues} >

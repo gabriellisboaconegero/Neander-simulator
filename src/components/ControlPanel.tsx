@@ -13,7 +13,8 @@ export const ControlPanel: React.FC = () => {
     step,
     setNewAc,
     zerarPc,
-    run
+    run,
+    downloadMem
   } = useNeander();
   const [addr, setAddr] = useState("");
   const isValidAddr = useValidAddr();
@@ -51,7 +52,7 @@ export const ControlPanel: React.FC = () => {
             type="text"
             name="set_ac"
             id="set_ac"
-            placeholder="New AC value[-128, 255]"
+            placeholder="New AC value"
             autoComplete="off"
             value={addr}
             onFocus={e => e.target.select()}
@@ -74,6 +75,7 @@ export const ControlPanel: React.FC = () => {
         <legend>Controls:</legend>
         <button onClick={e => step()}>Step</button>
         <button onClick={e => run()}>Run</button>
+        <button onClick={e => downloadMem()}>Download .txt file</button>
       </ControlsPanel>
     </ControlPanelWrapper>
   );

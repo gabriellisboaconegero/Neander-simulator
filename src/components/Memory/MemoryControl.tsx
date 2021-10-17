@@ -10,6 +10,7 @@ export const MemoryControl: React.FC = () => {
   const {
     memory,
     updateMem,
+    shiftMem
   }  = useNeander();
 
   const [instructionAddr, setInstructionAddr] = useState("");
@@ -86,12 +87,12 @@ export const MemoryControl: React.FC = () => {
           value={instructionAddr}
           onChange={handleNewInstructionInput}
           type="text"
-          placeholder="Instruction nº[-128, 255]"
+          placeholder="Instruction number"
           autoComplete="off"
           onFocus={e => e.target.select()}
-          onLoad={e => console.log(e)}
           onClick={e => handleClickOnMemoryCell(selected)}
         />
+        <button type="button" onClick={e => shiftMem(selected, 1)}>Add mem line</button>
         <button type="submit">Set mem</button>
       </form>
       <div className="just_see">
